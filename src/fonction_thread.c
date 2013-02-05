@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "config.h"
 #include "reseau.h"
 #include "traitement.h"
@@ -44,7 +45,7 @@ void* thread_search_reseau(void* data)
 }
 
 
-void* thread_reception_data(void* data)//TODO
+void* thread_reception_data(void* data)
 {
 	//se mettre en ecoute sur 0.0.0.0
 	struct sockaddr_in sin;
