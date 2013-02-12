@@ -3,6 +3,7 @@
 #include "rsa.h"
 #include "clee_pub.h"
 #include "camellia.h"
+#include "sha4.h"
 
 int dechiffrer_rsa(char* cryptogramme, char* sortie, int taille_sortie)
 {
@@ -68,4 +69,57 @@ int comparer_md5(unsigned char* donnee, int taille_donnee, unsigned char hash[16
 		}
 	}
 	return SUCCES;
+}
+
+unsigned char* protocole_dechiffrement(unsigned char *fichier_chiffre, int taille)
+{
+	unsigned char *clee_symetrique = NULL;
+	unsigned char *IV = NULL;
+	unsigned char *hash_origine = NULL;
+	unsigned char hash_claire[TAILLE_HASH/8] = {0};
+	unsigned char *cryptogramme_rsa = NULL;
+	unsigned char data_dechiffre[(TAILLE_CLEE_RSA/8)] = {0};
+	unsigned char *fichier = fichier_chiffre + TAILLE_CLEE_RSA/8;
+	unsigned char *fichier_claire = NULL;
+	char ret;
+	camellia_context camellia;
+	//recuperer cryptogramme 
+	cryptogramme_rsa = fichier_chiffre;
+	
+	//dechiffrer le cryptogramme
+	printf("[i] Dechiffrement du cryptogramme RSA\n");
+	ret = dechiffrer_rsa(cryptogramme_rsa, (TAILLE_CLEE_RSA/8), data_dechiffre, (TAILLE_CLEE_RSA/8));
+	if(ret == ERREUR)
+	{
+		printf("[-] Le dechiffrement a pose une erreur\n");
+	}	
+	//Extrait les données du texte claire
+	printf("[i] Association des donnees\n");
+	clee_symetrique = data_dechiffre;
+	hash_origine = data_dechiffre + TAILLE_CLEE_CAMELIA/8;
+	IV = data_dechiffre + TAILLE_CLEE_CAMELIA/8 + TAILLE_HASH/8;
+
+	//dechiffrer fichier
+	printf("[i] Dechiffrement du fichier avec la clee symetrique\n");
+	fichier_claire = malloc(sizeof(unsigned char) * (taille - RSA_TAILLE/8));
+	camellia_setkey_dec( &camellia, clee_symetrique, TAILLE_CLEE_CAMELIA);
+	ret = camellia_crypt_cbc( &camellia, CAMELLIA_DECRYPT, taille - TAILLE_CLEE_RSA/8, IV, fichier, fichier_claire);
+	if(ret != 0)
+	{
+		printf("[-] Le dechiffrement a pose une erreur\n");
+		free(fichier_claire);
+		return NULL;
+	}
+	//calculer hash  du fichier claire
+	printf("[i] Calcule du hash\n");
+	sha4(fichier_claire, taille - TAILLE_CLEE_RSA/8, hash_claire, 0);	
+	//comparer les hashs
+	printf("[i] Comparaison des hash\n");
+	if(memcmp(hash_origine, hash_claire, TAILLE_HASH/8) != 0)
+	{
+		printf("[-] Les hash ne correspondent pas\n");
+		free(fichier_claire);
+		return NULL;
+	}
+	return fichier_claire;	
 }

@@ -28,7 +28,7 @@
  *  http://csrc.nist.gov/publications/fips/fips180-2/fips180-2.pdf
  */
 
-#include "config_polarssl.h"
+#include "config.h"
 
 #if defined(POLARSSL_SHA4_C)
 
