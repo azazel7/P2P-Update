@@ -38,6 +38,8 @@ typedef struct sockaddr SOCKADDR;
 
 #define TAILLE_CLEE_RSA 4096
 #define TAILLE_CLEE_CAMELIA 256
+#define TAILLE_HASH 512
+#define TAILLE_IV 128
 
 typedef struct
 {

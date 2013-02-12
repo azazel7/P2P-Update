@@ -152,7 +152,7 @@ void* thread_reception_maj(void* data)
 	printf("[i] Mise a jour recus : %d octets\n", taille_maj);
 	//traitement de la mise a jour
 	//On commence par recuperer la clee camelia
-	erreur = recuperer_texte_rsa(maj, (TAILLE_CLEE_RSA/8), clee_camelia, TAILLE_CLEE_CAMELIA);
+	//erreur = recuperer_texte_rsa(maj, (TAILLE_CLEE_RSA/8), clee_camelia, TAILLE_CLEE_CAMELIA);
 	printf("[i] Clee camellia: %s\n", clee_camelia);
 	//Checker si c'est une bonne mise à jour
 	maj_claire = malloc(sizeof(unsigned char)*(taille_maj - (TAILLE_CLEE_RSA/8) + 16 + 16));
