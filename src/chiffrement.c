@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "config.h"
 #include "config_polarssl.h"
 #include "rsa.h"
@@ -88,7 +89,7 @@ unsigned char* protocole_dechiffrement(unsigned char *fichier_chiffre, int taill
 	
 	//dechiffrer le cryptogramme
 	printf("[i] Dechiffrement du cryptogramme RSA\n");
-	ret = dechiffrer_rsa(cryptogramme_rsa, (TAILLE_CLEE_RSA/8), data_dechiffre, (TAILLE_CLEE_RSA/8));
+	ret = dechiffrer_rsa(cryptogramme_rsa, data_dechiffre, (TAILLE_CLEE_RSA/8));
 	if(ret == ERREUR)
 	{
 		printf("[-] Le dechiffrement a pose une erreur\n");
