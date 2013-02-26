@@ -77,7 +77,7 @@ int envoyer_maj_tcp(int port, char* paquet, int taille)
 	Cette fonction permet de recevoir une mise a jour.
 	On se connecte a celui qui nous fourni la mise a jour.
 */
-int recevoir_maj_tcp(unsigned int ip, int port, char** paquet, int *taille)
+int recevoir_maj_tcp(unsigned int ip, int port, unsigned char** paquet, int *taille)
 {
 
 	struct sockaddr_in sin;

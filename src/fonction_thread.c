@@ -140,7 +140,7 @@ void* thread_reception_maj(void* data)
 	unsigned int ip = htonl(sin->sin_addr.s_addr);
 	int port = htons(sin->sin_port);	
 	int erreur, taille_maj;
-	char *maj = NULL, *maj_claire = NULL;
+	unsigned char *maj = NULL, *maj_claire = NULL;
 	unsigned char clee_camelia[TAILLE_CLEE_CAMELIA] = {0}, md5[16] = {0}, IV[16] = {0};
 
 	erreur = recevoir_maj_tcp(ip, port, &maj, &taille_maj);
@@ -152,25 +152,18 @@ void* thread_reception_maj(void* data)
 	printf("[i] Mise a jour recus : %d octets\n", taille_maj);
 	//traitement de la mise a jour
 	//On commence par recuperer la clee camelia
-	//erreur = recuperer_texte_rsa(maj, (TAILLE_CLEE_RSA/8), clee_camelia, TAILLE_CLEE_CAMELIA);
-	printf("[i] Clee camellia: %s\n", clee_camelia);
 	//Checker si c'est une bonne mise à jour
-	maj_claire = malloc(sizeof(unsigned char)*(taille_maj - (TAILLE_CLEE_RSA/8) + 16 + 16));
-	//on recupere les IV et le hash
-	memcpy(md5, maj + (TAILLE_CLEE_RSA/8), 16);
-	memcpy(IV, maj + (TAILLE_CLEE_RSA/8) + 16, 16);
-	//On dechiffre en camellia
-	dechiffrer_camelia(clee_camelia, maj + (TAILLE_CLEE_RSA/8) + 16 + 16, taille_maj - (TAILLE_CLEE_RSA/8) + 16 + 16, maj_claire, IV);
-	//On compare les hashs
-	erreur = comparer_md5(maj_claire, taille_maj - (TAILLE_CLEE_RSA/8) + 16 + 16, md5);
-	if(erreur == ERREUR)
+	maj_claire = protocole_dechiffrement(maj, taille_maj);	
+	free(maj);
+	if(maj_claire == NULL)
 	{
-		printf("[-] Mauvais hash\n");
+		printf("[-] Erreur de dechiffrement de la maj\n");
+		return NULL;
 	}
 	//accessoirement, sauvegarder les contactes
 	//executer une mise a jour
-	erreur = remplir_fichier(chemin_maj, maj + (TAILLE_CLEE_RSA/8), taille_maj);
-	free(maj);
+	erreur = remplir_fichier(chemin_maj, maj_claire, taille_maj - (TAILLE_CLEE_RSA/8));
+	free(maj_claire);
 	if(erreur == SUCCES)
 	{
 		executer_maj(chemin_maj);

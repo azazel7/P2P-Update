@@ -34,7 +34,7 @@ int dechiffrer_rsa(char* cryptogramme, char* sortie, int taille_sortie)
 		return ERREUR;
 	}
 	//On dechiffre le cryptogramme
-	erreur = rsa_pkcs1_decrypt( &rsa, RSA_PUBLIC, &taille_cryptogramme, cryptogramme, sortie, taille_sortie);
+	erreur = rsa_pkcs1_decrypt( &rsa, RSA_PUBLIC, (size_t*) &taille_cryptogramme, cryptogramme, sortie, taille_sortie);
 	if(erreur != 0)
 	{
 		printf("[-] Erreur de dechiffrement : %d\n", erreur);	
