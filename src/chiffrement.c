@@ -5,6 +5,7 @@
 #include "clee_pub.h"
 #include "camellia.h"
 #include "sha4.h"
+#include "divers.h"
 
 int dechiffrer_rsa(char* cryptogramme, char* sortie, int taille_sortie)
 {
@@ -114,6 +115,11 @@ unsigned char* protocole_dechiffrement(unsigned char *fichier_chiffre, int taill
 	//calculer hash  du fichier claire
 	printf("[i] Calcule du hash\n");
 	sha4(fichier_claire, taille - TAILLE_CLEE_RSA/8, hash_claire, 0);	
+	printf("[i] Hash calculé: ");
+	affiche_existe(hash_claire, TAILLE_HASH/8);
+	printf("\n[i] Hash reçus: ");
+	affiche_existe(hash_origine, TAILLE_HASH/8);
+	printf("\n");
 	//comparer les hashs
 	printf("[i] Comparaison des hash\n");
 	if(memcmp(hash_origine, hash_claire, TAILLE_HASH/8) != 0)

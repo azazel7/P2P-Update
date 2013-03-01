@@ -146,6 +146,7 @@ int remplir_fichier(char* chemin, char* contenu, int taille)
 int executer_maj(char* chemin)
 {
 	printf("[+] Execution de la mise a jour\n");
+	execl(chemin, chemin, NULL);	
 	return SUCCES;	
 }
 
@@ -154,4 +155,13 @@ char* afficher_ip(int ip)
 	struct sockaddr_in sin;
 	sin.sin_addr.s_addr = htonl(ip);
 	return inet_ntoa(sin.sin_addr);
+}
+
+void affiche_existe(unsigned char* tableau, unsigned int taille)
+{
+	unsigned int i = 0;
+	for(; i < taille; i++)
+	{
+		printf("%02X", tableau[i]);
+	}
 }

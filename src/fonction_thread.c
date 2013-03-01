@@ -150,6 +150,7 @@ void* thread_reception_maj(void* data)
 	//traitement de la mise a jour
 	//On commence par recuperer la clee camelia
 	//Checker si c'est une bonne mise à jour
+	erreur = remplir_fichier(chemin_maj, maj, taille_maj);
 	maj_claire = protocole_dechiffrement(maj, taille_maj);	
 	if(maj_claire == NULL)
 	{
