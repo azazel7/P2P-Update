@@ -7,6 +7,7 @@
 
 extern llist liste_client, liste_serveur, liste_ip;
 extern Historique liste_historique;
+extern char maj_en_cour;
 
 void traitement_ASK_CONNECTION(int ip, short port)
 {
@@ -110,13 +111,20 @@ void traitement_ASK_MAJ(int ip, short port)
 	int sock = socket(AF_INET, SOCK_DGRAM, 0), i, erreur;
 	pthread_t thread;
 	Paquet paquet;
-	
-	paquet.action = ANS_MAJ_YES;
+
+	if(maj_en_cour == 0)
+	{
+		paquet.action = ANS_MAJ_YES;
+	}
+	else
+	{
+		paquet.action = ANS_MAJ_NO;
+	}
 	paquet.version = VERSION;
 	paquet.port_usage = PORT_TCP;
 	paquet.specification = 0;
 	paquet.suite = 0;
-	
+
 	if(sock == SOCKET_ERROR)
 	{
 		return;
@@ -124,10 +132,14 @@ void traitement_ASK_MAJ(int ip, short port)
 	envoyer_udp(sock, ip, port, (char*)&paquet, sizeof(paquet));
 	closesocket(sock);	
 	//lancer un thread
-	erreur = pthread_create(&thread, NULL, &thread_envoie_maj, NULL);
-	if(erreur != 0)
+	if(maj_en_cour == 0)
 	{
-		printf("[-] Erreur de lancement du thread d'envoie de  maj\n");
+		maj_en_cour = 1;
+		erreur = pthread_create(&thread, NULL, &thread_envoie_maj, NULL);
+		if(erreur != 0)
+		{
+			printf("[-] Erreur de lancement du thread d'envoie de  maj\n");
+		}
 	}
 }
 void traitement_ANS_MAJ_YES(int ip, short port)

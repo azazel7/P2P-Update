@@ -15,7 +15,7 @@ typedef int SOCKET;
 typedef struct sockaddr_in SOCKADDR_IN;
 typedef struct sockaddr SOCKADDR;
 
-#define VERSION 1
+#define VERSION 2
 
 #define PORT_UDP 40000
 #define PORT_TCP 3000

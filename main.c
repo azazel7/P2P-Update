@@ -13,8 +13,8 @@
 
 llist liste_client = NULL, liste_serveur = NULL, liste_ip = NULL;
 Historique liste_historique;
-char* chemin_maj = NULL;
-
+char* chemin_maj = NULL, *chemin_executable = NULL;
+char maj_en_cour = 0;
 //getifaddrs
 /*
    Pour le moment, 
@@ -24,8 +24,8 @@ int main(int  argc, char** argv)
 	printf("[i] Demarrage version: %d\n", VERSION);
 	chemin_maj = "narval.txt";
 	printf("[i] Chemin de maj: %s\n", chemin_maj);
-
-/*	
+	chemin_executable = argv[0];
+	printf("[i] Chemin de l'executable: %s\n", chemin_executable);
 	if(argc == 3)
 	{
 		Paquet paquet;
@@ -45,7 +45,7 @@ int main(int  argc, char** argv)
 		thread_reception_data(NULL);
 	}
 
-*/	
+	
 	printf("[i] Fin version: %d\n", VERSION);
 	return 0;
 }

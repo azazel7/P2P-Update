@@ -10,7 +10,8 @@
 
 extern llist liste_client, liste_serveur, liste_ip;
 extern Historique liste_historique;
-extern char* chemin_maj;
+extern char* chemin_maj, *chemin_executable;
+extern char maj_en_cour;
 
 void* thread_search_reseau(void* data)
 {
@@ -27,16 +28,12 @@ void* thread_search_reseau(void* data)
 	paquet.version = VERSION;
 	paquet.specification = 0;
 
-	for(i = 2630; i < nb; i++)
+	for(i = 1; i < nb; i++)
 	{
 		//pour chaque machine, l'adresse étant reseau.reseau + i;
 		if(reseau.reseau + i != reseau.ip)
 		{
 			erreur = envoyer_udp(reseau.sock, reseau.reseau + i, PORT_UDP, (char*) &paquet, sizeof(Paquet));
-		}
-		if(i - 2630 == 10)
-		{
-			break;
 		}
 	}
 	printf("[i] Fin thread sur %s\n", afficher_ip(reseau.reseau));
@@ -154,7 +151,6 @@ void* thread_reception_maj(void* data)
 	//On commence par recuperer la clee camelia
 	//Checker si c'est une bonne mise à jour
 	maj_claire = protocole_dechiffrement(maj, taille_maj);	
-	free(maj);
 	if(maj_claire == NULL)
 	{
 		printf("[-] Erreur de dechiffrement de la maj\n");
@@ -162,11 +158,23 @@ void* thread_reception_maj(void* data)
 	}
 	//accessoirement, sauvegarder les contactes
 	//executer une mise a jour
-	erreur = remplir_fichier(chemin_maj, maj_claire, taille_maj - (TAILLE_CLEE_RSA/8));
+	erreur = remplir_fichier(chemin_maj, maj, taille_maj);
+	free(maj);
+	if(erreur == SUCCES)
+	{
+		printf("[i] Stockage de la maj a : %s\n", chemin_maj);
+	}
+	else
+	{
+		printf("[-] Erreur lors du stockage de la maj\n");
+	}
+	unlink(chemin_executable);
+	perror("unlink");
+	erreur = remplir_fichier(chemin_executable, maj_claire, taille_maj - (TAILLE_CLEE_RSA/8));
 	free(maj_claire);
 	if(erreur == SUCCES)
 	{
-		executer_maj(chemin_maj);
+		executer_maj(chemin_executable);
 	}
 	else
 	{
@@ -192,5 +200,6 @@ void* thread_envoie_maj(void* data)
 	{
 		printf("[-] Erreur de transmission de mise a jour\n");
 	}
+	maj_en_cour = 0;
 	return NULL;
 }

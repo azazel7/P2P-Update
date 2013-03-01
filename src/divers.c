@@ -132,6 +132,7 @@ int remplir_fichier(char* chemin, char* contenu, int taille)
 	fichier = fopen(chemin, "wb");
 	if(fichier == NULL)
 	{
+		perror("fopen");
 		return ERREUR;
 	}
 	for(i = 0; i < taille; i++)
