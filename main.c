@@ -44,8 +44,27 @@ int main(int  argc, char** argv)
 		alarm(MAX_BEFORE_ERASE_CONTACTE);
 		thread_reception_data(NULL);
 	}
+/*
+	if(argc == 2)
+	{
+		int taille;
+		char* paq = NULL;	
+		recevoir_maj_tcp(htonl(inet_addr("192.168.2.2")), PORT_TCP, &paq , &taille);
+		if(paq != NULL)
+		{
+			printf("Recu\n");
+		}
+		else
+		{
+			printf("Tjr nul\n");
+		}
+	}
+	else
+	{
+		thread_envoie_maj(NULL);	
+	}
 
-	
+*/	
 	printf("[i] Fin version: %d\n", VERSION);
 	return 0;
 }

@@ -31,7 +31,10 @@ int envoyer_maj_tcp(int port, char* paquet, int taille)
 {
 
 	struct sockaddr_in sin, csin;
-	int sock = socket(AF_INET, SOCK_STREAM, 0), csock, csize, err, retour = SUCCES;
+	bzero(&csin, sizeof(struct sockaddr));
+	bzero(&sin, sizeof(struct sockaddr));
+	
+	int sock = socket(AF_INET, SOCK_STREAM, 0), csock, csize = sizeof(struct sockaddr), err, retour = SUCCES;
 	if(sock == SOCKET_ERROR)
 	{
 		return SOCKET_ERROR;
@@ -43,12 +46,12 @@ int envoyer_maj_tcp(int port, char* paquet, int taille)
 
 	if(bind(sock, (struct sockaddr*)&sin, sizeof(sin)) == SOCKET_ERROR)
 	{
-		perror("bind");
+		perror("[-] bind");
 		return SOCKET_ERROR;
 	}
 	if(listen(sock, 5) == SOCKET_ERROR)
 	{
-		perror("listen");
+		perror("[-] listen");
 		return SOCKET_ERROR;
 	}
 	fd_set readfs;
@@ -57,12 +60,21 @@ int envoyer_maj_tcp(int port, char* paquet, int taille)
 	timeout.tv_usec = 0;
 	FD_ZERO(&readfs); //on vide la selection
 	FD_SET(sock, &readfs);
+	printf("[i] Attente du select\n");
 	err = select(sock + 1, &readfs, NULL, NULL, &timeout);
+	printf("[i] Fin d'attente du select\n");
 	if(err > 0 && FD_ISSET(sock, &readfs))
 	{
 		csock = accept(sock, (struct sockaddr*)&csin, &csize);
 		send(csock, &taille, sizeof(taille), 0);
-		send(csock, paquet, taille, 0);
+		unsigned char hash[150] = {0};
+		sha4(paquet, taille, hash, 0);
+		printf("[i] Hash avant envoie: ");
+		affiche_existe(hash, TAILLE_HASH/8);
+		printf("\n");
+		int nb_envoie = send(csock, paquet, taille, 0);
+		perror("[i] send");
+		printf("[i] %d octets envoyés\n");
 		closesocket(csock);
 	}
 	else
@@ -85,6 +97,7 @@ int recevoir_maj_tcp(unsigned int ip, int port, unsigned char** paquet, int *tai
 	int size = 0;
 	if(sock == SOCKET_ERROR)
 	{
+		printf("[-] Socket impossible a creer\n");
 		return SOCKET_ERROR;
 	}
 
@@ -97,6 +110,7 @@ int recevoir_maj_tcp(unsigned int ip, int port, unsigned char** paquet, int *tai
 		i++;
 		if(i == NOMBRE_MAX_ESSAI_CONNEXION_MAJ)
 		{
+			printf("[-] 10 essais\n");
 			return SOCKET_ERROR;
 		}
 		sleep(TIME_BETWEEN_ESSAI_CONNEXION);
@@ -107,9 +121,17 @@ int recevoir_maj_tcp(unsigned int ip, int port, unsigned char** paquet, int *tai
 	if(size > 0)
 	{
 		(*paquet) = (char*)malloc(sizeof(char)*(size));
+		bzero(*paquet, size*sizeof(char));
 		if((*paquet) != NULL)
 		{
-			recv(sock, (void*)(*paquet), size, 0);
+			int nb_byte = recv(sock, (void*)(*paquet), size, MSG_WAITALL);
+			perror("[i] recv");
+			printf("[i] %d octets lus\n");
+			unsigned char hash[150] = {0};
+			sha4(*paquet, size, hash, 0);
+			printf("[i] Hash fichier reçus: ");
+			affiche_existe(hash, TAILLE_HASH/8);
+			printf("\n");
 		}
 		else
 		{

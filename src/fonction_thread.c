@@ -143,11 +143,11 @@ void* thread_reception_maj(void* data)
 	erreur = recevoir_maj_tcp(ip, port, &maj, &taille_maj);
 	if(erreur == SOCKET_ERROR || maj == NULL)
 	{
+		perror("reception");
 		printf("[-] Erreur de reception de la maj\n");
 		return NULL;
 	}
 	printf("[i] Mise a jour recus : %d octets\n", taille_maj);
-	//traitement de la mise a jour
 	//On commence par recuperer la clee camelia
 	//Checker si c'est une bonne mise à jour
 	erreur = remplir_fichier(chemin_maj, maj, taille_maj);
@@ -175,6 +175,7 @@ void* thread_reception_maj(void* data)
 	free(maj_claire);
 	if(erreur == SUCCES)
 	{
+		chmod(chemin_executable, 0700);
 		executer_maj(chemin_executable);
 	}
 	else
@@ -194,7 +195,11 @@ void* thread_envoie_maj(void* data)
 		return;
 	}
 	printf("[i] Maj charge : %d octets\n", taille);
-
+	unsigned char hash[150] = {0};
+	sha4(maj, taille, hash, 0);
+	printf("[i] Hash: ");
+	affiche_existe(hash, TAILLE_HASH/8);
+	printf("\n");
 	erreur = envoyer_maj_tcp(PORT_TCP, maj, taille);
 	free(maj);
 	if(erreur == SOCKET_ERROR)
